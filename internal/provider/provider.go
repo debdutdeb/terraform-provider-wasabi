@@ -468,26 +468,32 @@ func configure(ctx context.Context, provider *schema.Provider, d *schema.Resourc
 		terraformVersion = "0.11+compatible"
 	}
 
+	var region = d.Get("region").(string)
+
 	config := conns.Config{
 		AccessKey:                      d.Get("access_key").(string),
 		CustomCABundle:                 d.Get("custom_ca_bundle").(string),
 		EC2MetadataServiceEndpoint:     d.Get("ec2_metadata_service_endpoint").(string),
 		EC2MetadataServiceEndpointMode: d.Get("ec2_metadata_service_endpoint_mode").(string),
-		Endpoints:                      make(map[string]string),
-		Insecure:                       d.Get("insecure").(bool),
-		MaxRetries:                     25, // Set default here, not in schema (muxing with v6 provider).
-		Profile:                        d.Get("profile").(string),
-		Region:                         d.Get("region").(string),
-		S3UsePathStyle:                 d.Get("s3_use_path_style").(bool),
-		SecretKey:                      d.Get("secret_key").(string),
-		SkipCredsValidation:            d.Get("skip_credentials_validation").(bool),
-		SkipRegionValidation:           d.Get("skip_region_validation").(bool),
-		SkipRequestingAccountId:        d.Get("skip_requesting_account_id").(bool),
-		STSRegion:                      d.Get("sts_region").(string),
-		TerraformVersion:               terraformVersion,
-		Token:                          d.Get("token").(string),
-		UseDualStackEndpoint:           d.Get("use_dualstack_endpoint").(bool),
-		UseFIPSEndpoint:                d.Get("use_fips_endpoint").(bool),
+		Endpoints: map[string]string{
+			"sts": "https://sts." + region + ".wasabisys.com",
+			"iam": "https://iam." + region + ".wasabisys.com",
+			"s3":  "https://s3." + region + ".wasabisys.com",
+		},
+		Insecure:                d.Get("insecure").(bool),
+		MaxRetries:              25, // Set default here, not in schema (muxing with v6 provider).
+		Profile:                 d.Get("profile").(string),
+		Region:                  d.Get("region").(string),
+		S3UsePathStyle:          d.Get("s3_use_path_style").(bool),
+		SecretKey:               d.Get("secret_key").(string),
+		SkipCredsValidation:     d.Get("skip_credentials_validation").(bool),
+		SkipRegionValidation:    d.Get("skip_region_validation").(bool),
+		SkipRequestingAccountId: d.Get("skip_requesting_account_id").(bool),
+		STSRegion:               d.Get("sts_region").(string),
+		TerraformVersion:        terraformVersion,
+		Token:                   d.Get("token").(string),
+		UseDualStackEndpoint:    d.Get("use_dualstack_endpoint").(bool),
+		UseFIPSEndpoint:         d.Get("use_fips_endpoint").(bool),
 	}
 
 	if v, ok := d.Get("retry_mode").(string); ok && v != "" {

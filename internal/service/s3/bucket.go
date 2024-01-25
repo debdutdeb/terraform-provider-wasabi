@@ -1046,6 +1046,10 @@ func resourceBucketRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	case tfresource.NotFound(err), tfawserr.ErrCodeEquals(err, errCodeMethodNotAllowed, errCodeNotImplemented, errCodeXNotImplemented):
 		d.Set("replication_configuration", nil)
+	// ignore 401s if an s3 implementation
+	// FIXME
+	case !strings.Contains(*conn.Options().BaseEndpoint, "amazonaws") && tfawserr.ErrCodeEquals(err, errCodeAccessDenied):
+		d.Set("replication_configuration", nil)
 	default:
 		return diag.Errorf("reading S3 Bucket (%s) replication configuration: %s", d.Id(), err)
 	}
